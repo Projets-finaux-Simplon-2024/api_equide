@@ -1,49 +1,55 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from . import models, schemas
-from .database import SessionLocal, engine
-
-# Créer les tables de la base de données
-models.Base.metadata.create_all(bind=engine)
+from sqlalchemy import desc
+from . import models, schemas, database
+import json
+from datetime import time
 
 app = FastAPI()
 
-# Dépendance pour obtenir la session de base de données
+# Dépendance pour obtenir une session de base de données
 def get_db():
-    db = SessionLocal()
+    db = database.SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-# Endpoint pour récupérer les données de course d'un cheval
-@app.post("/cheval", response_model=schemas.ChevalWithParticipations)
-def get_course_data(request: schemas.ChevalRequest, db: Session = Depends(get_db)):
-    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == request.nom_tf).first()
-    if not cheval:
+@app.get("/resultat/{nomCheval}", response_model=schemas.ChevalResponse)
+def get_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
+
+    # Convertir le nom du cheval en majuscules pour la recherche
+    nom_cheval_normalise = nomCheval.upper()
+
+    db_cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
+
+    if db_cheval is None:
         raise HTTPException(status_code=404, detail="Cheval not found")
-    participations = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == request.nom_tf).all()
-    return schemas.ChevalWithParticipations(cheval=cheval, participations=participations)
-
-# Fonction récursive pour récupérer la généalogie
-def get_genealogy(db: Session, nom_tf: str, generations: int):
-    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == nom_tf).first()
-    if not cheval or generations == 0:
-        return None
     
-    pere = get_genealogy(db, cheval.pere_tf, generations - 1) if cheval.pere_tf else None
-    mere = get_genealogy(db, cheval.mere_tf, generations - 1) if cheval.mere_tf else None
-    
-    return schemas.Genealogy(
-        cheval=cheval,
-        pere=pere,
-        mere=mere
-    )
+    nombre_courses_enregistrer = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).count()
 
-# Endpoint pour récupérer la généalogie d'un cheval
-@app.post("/genealogie", response_model=schemas.Genealogy)
-def get_genealogy_endpoint(request: schemas.ChevalRequest, generations: int = 3, db: Session = Depends(get_db)):
-    genealogy = get_genealogy(db, request.nom_tf, generations)
-    if not genealogy:
-        raise HTTPException(status_code=404, detail="Généalogie not found")
-    return genealogy
+    # Calculer la précision
+    nombre_courses_total = db_cheval.nombre_courses
+    precision = (nombre_courses_enregistrer / nombre_courses_total) * 100 if nombre_courses_total > 0 else 0
+
+    # Effectuer la jointure pour obtenir les détails des courses
+    jointure = db.query(models.Courses).join(models.ParticipationsAuxCourses, models.Courses.id_course == models.ParticipationsAuxCourses.id_course).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).all()
+    
+    # Convertir les résultats de la jointure en dictionnaires et les imprimer
+    jointure_dicts = []
+    for course in jointure:
+        course_dict = {column.name: (str(getattr(course, column.name)) if isinstance(getattr(course, column.name), time) else getattr(course, column.name)) for column in course.__table__.columns}
+        jointure_dicts.append(course_dict)
+        print(json.dumps(course_dict, indent=4))
+
+    return schemas.ChevalResponse(
+            nomCheval=db_cheval.nom,
+            nombreCoursesEnregistrer=nombre_courses_enregistrer,
+            nombreCoursesTotal=db_cheval.nombre_courses,
+            precisionPercent=precision
+        )
+
+# Lancer le serveur avec Uvicorn
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
