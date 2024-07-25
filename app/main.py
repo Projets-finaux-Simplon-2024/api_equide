@@ -148,7 +148,7 @@ def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
 
 
 # ------------------------------------------------------ Endpoint pour récupérer la généalogie d'un cheval -------------------------------------------------|
-def get_genealogie(nom: str, db: Session, depth: int = 0, max_depth: int = 3) -> Optional[schemas.GenealogieCheval]:
+def get_genealogie(nom: str, db: Session, depth: int = 0, max_depth: int = 1) -> Optional[schemas.GenealogieCheval]:
     if depth > max_depth:
         return None
 
