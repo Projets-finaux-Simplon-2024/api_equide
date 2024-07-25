@@ -23,26 +23,28 @@ class StatsIfceResponse(BaseModel):
     dispoStats: str
     race: str
 
-    
-class GenealogieCheval(BaseModel):
+class InfosResponse(BaseModel):
     nom: str
-    sexe: Optional[str]
-    couleur: Optional[str]
-    dateDeNaissance: Optional[int]
-    naisseur: Optional[str]
-    lienIfce: Optional[str]
-    pere: Optional['GenealogieCheval']
-    mere: Optional['GenealogieCheval']
+    sexe: str
+    couleur: str
+    dateDeNaissance: Optional[int] = None
+    naisseur: Optional[str] = None
+    lienIfce: Optional[str] = None
+    pere: str
+    mere: str
 
 class GenealogieResponse(BaseModel):
-    nomCheval: str
-    sexeCheval: str
-    couleurCheval: str
-    dateDeNaissance: int
-    naisseur: str
-    lienIfce: str
-    pere: Optional[GenealogieCheval]
-    mere: Optional[GenealogieCheval]
+    nom: str
+    sexe: str
+    couleur: str
+    dateDeNaissance: Optional[int] = None
+    naisseur: Optional[str] = None
+    lienIfce: Optional[str] = None
+    pere: str
+    informationsPere: Optional['GenealogieResponse'] = None
+    mere: str
+    informationsMere: Optional['GenealogieResponse'] = None
 
-GenealogieResponse.model_rebuild()
-GenealogieCheval.model_rebuild()
+    class Config:
+        from_attributes = True
+        arbitrary_types_allowed = True
