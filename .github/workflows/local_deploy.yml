@@ -41,7 +41,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          docker build -t ghcr.io/projets-finaux-simplon-2024/api_equide:latest .
 
       - name: Log in to GitHub Packages
         run: |
@@ -49,4 +49,4 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/projets-finaux-simplon-2024/api_equide:latest
