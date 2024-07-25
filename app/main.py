@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from . import models, schemas, database
-from typing import Optional, Dict, Any
 import pandas as pd
 
 app = FastAPI()
