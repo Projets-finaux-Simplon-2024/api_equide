@@ -65,8 +65,8 @@ def get_chevaux(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1), db
     # Calculer l'offset et la limite
     offset = (page - 1) * page_size
 
-    # Requête pour obtenir les résultats paginés
-    chevaux = db.query(models.ChevauxTrotteurFrancais).offset(offset).limit(page_size).all()
+    # Requête pour obtenir les résultats paginés avec un ordre spécifique
+    chevaux = db.query(models.ChevauxTrotteurFrancais).order_by(models.ChevauxTrotteurFrancais.id_tf).offset(offset).limit(page_size).all()
 
     # Requête pour obtenir le nombre total de résultats
     total_results = db.query(models.ChevauxTrotteurFrancais).count()
