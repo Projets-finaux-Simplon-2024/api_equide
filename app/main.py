@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from . import models, schemas, database
+from typing import List
 import pandas as pd
 
 app = FastAPI()
@@ -57,6 +58,70 @@ def get_stats_ifce(nomCheval: str, db: Session = Depends(get_db)):
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 
+
+# ------------------------------------------------------ Endpoint pour récupérer la pagination de la table chevaux trotteur Français -----------------------|
+@app.get("/chevaux/", response_model=schemas.PaginationResponse)
+def get_chevaux(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1), db: Session = Depends(get_db)):
+    # Calculer l'offset et la limite
+    offset = (page - 1) * page_size
+
+    # Requête pour obtenir les résultats paginés avec un ordre spécifique
+    chevaux = db.query(models.ChevauxTrotteurFrancais).order_by(models.ChevauxTrotteurFrancais.id_tf).offset(offset).limit(page_size).all()
+
+    # Requête pour obtenir le nombre total de résultats
+    total_results = db.query(models.ChevauxTrotteurFrancais).count()
+
+    if not chevaux:
+        raise HTTPException(status_code=404, detail="Aucun cheval trouvé")
+
+    total_pages = (total_results + page_size - 1) // page_size  # Calcul du nombre total de pages
+
+    # Convertir les résultats en objets Pydantic
+    chevaux_pydantic = [schemas.InfosResponse.from_orm(cheval) for cheval in chevaux]
+
+    return schemas.PaginationResponse(
+        total_results=total_results,
+        total_pages=total_pages,
+        current_page=page,
+        page_size=page_size,
+        results=chevaux_pydantic
+    )
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+
+
+# ------------------------------------------------------ Endpoint pour récupérer les infos d'un cheval -----------------------------------------------------|
+def get_complete_info(idCheval: int, db: Session):
+
+    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.id_tf == idCheval).first()
+
+    return schemas.InfosResponse(
+        id = cheval.id_tf,
+        nom = cheval.nom_tf,
+        sexe = cheval.sexe_tf,
+        couleur = cheval.couleur_tf,
+        dateDeNaissance = cheval.annee_naissance_tf,
+        naisseur = cheval.naisseur_tf,
+        lienIfce = cheval.lien_ifce_tf,
+        pere = cheval.pere_tf,
+        mere=cheval.mere_tf,
+    )
+@app.get("/infos-cheval/{idCheval}", response_model=schemas.InfosResponse)
+def get_infos_cheval(idCheval: int, db: Session = Depends(get_db)):
+
+    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.id_tf == idCheval).first()
+
+    if cheval:
+        infos = get_complete_info (cheval.id_tf, db)
+
+    if not cheval:
+        raise HTTPException(status_code=404, detail=f"Le cheval n'est pas un trotteur français !")
+
+    return infos
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+
+
 # ------------------------------------------------------ Endpoint pour récupérer les stats d'un cheval -----------------------------------------------------|
 @app.get("/stat-cheval/{nomCheval}", response_model=schemas.ChevalResponse)
 def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
@@ -65,7 +130,7 @@ def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
 
     # Récupération du nom et vérification de l'existence du cheval dans les courses -----------------------------
     nom_cheval_normalise = nomCheval.upper()
-    db_cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
+    db_cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise, models.ParticipationsAuxCourses.race == "TROTTEUR FRANCAIS").order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
     if db_cheval is None:
         raise HTTPException(status_code=404, detail="Le cheval n'a pas de courses enregistrées")
     
@@ -81,7 +146,7 @@ def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
     # Récupération des courses du cheval ------------------------------------------------------------------------
     query = (db.query(models.Courses, models.ParticipationsAuxCourses)
              .join(models.ParticipationsAuxCourses, models.Courses.id_course == models.ParticipationsAuxCourses.id_course)
-             .filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise))         
+             .filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise, models.ParticipationsAuxCourses.race == "TROTTEUR FRANCAIS"))         
     results = query.all()
 
 
@@ -144,72 +209,19 @@ def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
         )
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------|
 
-# ------------------------------------------------------ Endpoint pour récupérer les infos d'un cheval -----------------------------------------------------|
-def get_complete_info(nom: str, db: Session):
 
-    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == nom.upper()).first()
 
-    return schemas.GenealogieResponse(
-        nom = cheval.nom_tf,
-        sexe = cheval.sexe_tf,
-        couleur = cheval.couleur_tf,
-        dateDeNaissance = cheval.annee_naissance_tf,
-        naisseur = cheval.naisseur_tf,
-        lienIfce = cheval.lien_ifce_tf,
-        pere = cheval.pere_tf,
-        mere=cheval.mere_tf,
-    )
-
-def get_partial_info(nom: str, db: Session):
-
-    cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
-
-    return schemas.GenealogieResponse(
-        nom=cheval.nom,
-        sexe=cheval.sexe,
-        couleur=cheval.libelle_long_robe,
-        dateDeNaissance=None,
-        naisseur=None,
-        lienIfce=None,
-        pere=cheval.nom_pere,
-        mere=cheval.nom_mere,
-    )
-
-@app.get("/infos-cheval/{nomCheval}", response_model=schemas.InfosResponse)
-def get_infos_cheval(nomCheval: str, db: Session = Depends(get_db)):
-
-    # Normalisation des noms
-    nom_cheval_normalise = nomCheval.upper()
-
-    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == nom_cheval_normalise.upper()).first()
-
-    if cheval:
-        infos = get_complete_info (cheval.nom_tf, db)
-
-    if not cheval:
-        db_cheval_stat = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
-
-        if not db_cheval_stat:
-            raise HTTPException(status_code=404, detail="Cheval inexistant dans l'ensemble des tables")
-        
-        elif db_cheval_stat.race != "TROTTEUR FRANCAIS":
-            raise HTTPException(status_code=404, detail=f"Le cheval n'est pas un trotteur français, c'est un {db_cheval_stat.race}")
-        
-        else:
-           infos = get_partial_info (db_cheval_stat.nom, db)
-
-    return infos
-# ----------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 # ------------------------------------------------------ Endpoint pour récupérer la généalogie d'un cheval -------------------------------------------------|
-def get_complete_info_gen(nom: str, db: Session, depth: int):
+def get_complete_info_enfant(nom: str, db: Session, depth: int):
+
     cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == nom.upper()).first()
-    
+
     if not cheval:
         raise HTTPException(status_code=404, detail="Cheval non trouvé dans ChevauxTrotteurFrancais")
 
-    infos_pere = get_parent_info_gen(cheval.pere_tf, db, depth)
-    infos_mere = get_parent_info_gen(cheval.mere_tf, db, depth)
+    infos_pere = get_complete_info_parents(cheval.pere_tf, cheval.annee_naissance_tf, db, depth)
+    infos_mere = get_complete_info_parents(cheval.mere_tf, cheval.annee_naissance_tf, db, depth)
 
     return schemas.GenealogieResponse(
         nom=cheval.nom_tf,
@@ -218,68 +230,56 @@ def get_complete_info_gen(nom: str, db: Session, depth: int):
         dateDeNaissance=cheval.annee_naissance_tf,
         naisseur=cheval.naisseur_tf,
         lienIfce=cheval.lien_ifce_tf,
-        pere=cheval.pere_tf,
+        pere=cheval.pere_tf if cheval.pere_tf else "",
         informationsPere=infos_pere,
-        mere=cheval.mere_tf,
+        mere=cheval.mere_tf if cheval.mere_tf else "",
         informationsMere=infos_mere
     )
 
-def get_partial_info_gen(nom: str, db: Session, depth: int):
-    cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
-    
-    if not cheval:
-        raise HTTPException(status_code=404, detail="Cheval non trouvé dans ParticipationsAuxCourses")
-
-    infos_pere = get_parent_info_gen(cheval.nom_pere, db, depth)
-    infos_mere = get_parent_info_gen(cheval.nom_mere, db, depth)
-
-    return schemas.GenealogieResponse(
-        nom=cheval.nom,
-        sexe=cheval.sexe,
-        couleur=cheval.libelle_long_robe,
-        dateDeNaissance=None,
-        naisseur=None,
-        lienIfce=None,
-        pere=cheval.nom_pere,
-        informationsPere=infos_pere,
-        mere=cheval.nom_mere,
-        informationsMere=infos_mere
-    )
-
-
-def get_parent_info_gen(nom: str, db: Session, depth: int):
+def get_complete_info_parents(nom: str, child_birthdate: int, db: Session, depth: int):
     if depth <= 0 or not nom:
         return None
-    try:
-        return get_complete_info_gen(nom, db, depth - 1)
-    except HTTPException:
-        try:
-            return get_partial_info_gen(nom, db, depth - 1)
-        except HTTPException:
-            return None
 
+    cheval = db.query(models.ChevauxTrotteurFrancais).filter(
+        models.ChevauxTrotteurFrancais.nom_tf == nom.upper(),
+        models.ChevauxTrotteurFrancais.annee_naissance_tf <= child_birthdate - 5,
+        models.ChevauxTrotteurFrancais.annee_naissance_tf >= child_birthdate - 25
+    ).first()
+
+    if not cheval:
+        return None
+
+    infos_pere = get_complete_info_parents(cheval.pere_tf, cheval.annee_naissance_tf, db, depth - 1)
+    infos_mere = get_complete_info_parents(cheval.mere_tf, cheval.annee_naissance_tf, db, depth - 1)
+
+    return schemas.GenealogieResponse(
+        nom=cheval.nom_tf,
+        sexe=cheval.sexe_tf,
+        couleur=cheval.couleur_tf,
+        dateDeNaissance=cheval.annee_naissance_tf,
+        naisseur=cheval.naisseur_tf,
+        lienIfce=cheval.lien_ifce_tf,
+        pere=cheval.pere_tf if cheval.pere_tf else "",
+        informationsPere=infos_pere,
+        mere=cheval.mere_tf if cheval.mere_tf else "",
+        informationsMere=infos_mere
+    )
 
 @app.get("/genealogie-cheval/{nomCheval}", response_model=schemas.GenealogieResponse)
-def get_genealogie_cheval(nomCheval: str, db: Session = Depends(get_db), depth: int = 1):
+def get_genealogie_cheval(nomCheval: str, idCheval: int, db: Session = Depends(get_db), depth: int = 1):
 
     # Normalisation des noms
     nom_cheval_normalise = nomCheval.upper()
 
-    cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.nom_tf == nom_cheval_normalise.upper()).first()
+    cheval = db.query(models.ChevauxTrotteurFrancais).filter(
+        models.ChevauxTrotteurFrancais.nom_tf == nom_cheval_normalise,
+        models.ChevauxTrotteurFrancais.id_tf == idCheval
+    ).first()
 
-    if cheval:
-        infos = get_complete_info_gen(cheval.nom_tf, db, depth)
-    else:
-        db_cheval_stat = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise).order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
+    if not cheval:
+        raise HTTPException(status_code=404, detail="Cheval non trouvé dans ChevauxTrotteurFrancais")
 
-        if not db_cheval_stat:
-            raise HTTPException(status_code=404, detail="Cheval inexistant dans l'ensemble des tables")
-        
-        elif db_cheval_stat.race != "TROTTEUR FRANCAIS":
-            raise HTTPException(status_code=404, detail=f"Le cheval n'est pas un trotteur français, c'est un {db_cheval_stat.race}")
-        
-        else:
-           infos = get_partial_info_gen(db_cheval_stat.nom, db, depth)
+    infos = get_complete_info_enfant(cheval.nom_tf, db, depth)
 
     return infos
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------|
