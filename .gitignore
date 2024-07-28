@@ -1,1 +1,36 @@
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore test database
+test.db
+
+# Ignore SQLite database files
+*.sqlite3
+*.db
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+**/__pycache__/
+
+# Ignore virtual environment directories
+env/
+venv/
+.env/
 envEquide
+
+# Ignore other common files and directories
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.bak
+*.swp
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
