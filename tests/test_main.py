@@ -71,8 +71,17 @@ def setup_database():
     # Supprimer les tables de la base de données
     models.Base.metadata.drop_all(bind=engine)
 
+def get_access_token(client):
+    response = client.post(
+        "/auth/token",
+        data={"username": "admin", "password": "admin"},
+    )
+    return response.json()["access_token"]
+
 def test_get_chevaux(setup_database):
-    response = client.get("/chevaux/?page=1&page_size=10")
+    access_token = get_access_token(client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/chevaux/?page=1&page_size=10", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["total_results"] == 2
@@ -81,7 +90,9 @@ def test_get_chevaux(setup_database):
     assert len(data["results"]) == 2
 
 def test_get_stats_ifce(setup_database):
-    response = client.get("/stats-ifce/TEST_CHEVAL_1")
+    access_token = get_access_token(client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/stats-ifce/TEST_CHEVAL_1", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["dispoIFCE"] == "Oui"
@@ -90,14 +101,18 @@ def test_get_stats_ifce(setup_database):
     assert data["race"] == "Le cheval est un TROTTEUR FRANCAIS"
 
 def test_get_infos_cheval(setup_database):
-    response = client.get("/infos-cheval/1")
+    access_token = get_access_token(client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/infos-cheval/1", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["nom"] == "TEST_CHEVAL_1"
     assert data["sexe"] == "M"
 
 def test_get_stat_cheval_by_name(setup_database):
-    response = client.get("/stat-cheval/TEST_CHEVAL_1")
+    access_token = get_access_token(client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/stat-cheval/TEST_CHEVAL_1", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["nomCheval"] == "TEST_CHEVAL_1"
