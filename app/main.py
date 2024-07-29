@@ -2,10 +2,20 @@ from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from . import models, schemas, database
+from .auth import get_current_user, auth_router
 from typing import List
 import pandas as pd
 
-app = FastAPI()
+# Créer l'application FastAPI avec des métadonnées personnalisées
+app = FastAPI(
+    title="API de Gestion des Chevaux",
+    description="Cette API permet de gérer les informations et les statistiques des chevaux trotteur français.",
+    version="1.0.0",
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
+)
+
+# Monter le routeur d'authentification
+app.include_router(auth_router, prefix="/auth", tags=["Author"])
 
 # Dépendance pour obtenir une session de base de données
 def get_db():
@@ -24,8 +34,14 @@ def convertir_temps_en_secondes(temps):
 
 
 # ------------------------------------------------------ Endpoint pour savoir si un cheval a une généalogie ou des stats -----------------------------------|
-@app.get("/stats-ifce/{nomCheval}", response_model=schemas.StatsIfceResponse)
-def get_stats_ifce(nomCheval: str, db: Session = Depends(get_db)):
+@app.get(
+    "/stats-ifce/{nomCheval}", 
+    response_model=schemas.StatsIfceResponse,
+    summary="Permet de savoir si un cheval a des données dans la table IFCE et/ou dans la table des courses PMU",
+    description="Récupère quelques informations d'une table ou de l'autre ou des deux suivant ce qui est dispo",
+    tags=["Consultation des informations chevaux"]
+)
+def get_stats_ifce(nomCheval: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
 
     # Récupération du nom et vérification de l'existence du cheval dans la table trotteur français --------------
@@ -60,8 +76,14 @@ def get_stats_ifce(nomCheval: str, db: Session = Depends(get_db)):
 
 
 # ------------------------------------------------------ Endpoint pour récupérer la pagination de la table chevaux trotteur Français -----------------------|
-@app.get("/chevaux/", response_model=schemas.PaginationResponse)
-def get_chevaux(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1), db: Session = Depends(get_db)):
+@app.get(
+    "/chevaux/",
+    response_model=schemas.PaginationResponse,
+    summary="Lister les chevaux de race trotteur français avec pagination",
+    description="Récupère une liste de chevaux trotteur français avec pagination. Permet de spécifier la page et la taille de page pour naviguer à travers les résultats.",
+    tags=["Consultation des informations chevaux"]
+)
+def get_chevaux(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1), db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     # Calculer l'offset et la limite
     offset = (page - 1) * page_size
 
@@ -106,8 +128,14 @@ def get_complete_info(idCheval: int, db: Session):
         pere = cheval.pere_tf,
         mere=cheval.mere_tf,
     )
-@app.get("/infos-cheval/{idCheval}", response_model=schemas.InfosResponse)
-def get_infos_cheval(idCheval: int, db: Session = Depends(get_db)):
+@app.get(
+    "/infos-cheval/{idCheval}",
+    response_model=schemas.InfosResponse,
+    summary="Obtenir les informations d'un cheval de la race trotteur français",
+    description="Récupère les informations détaillées d'un cheval spécifique en utilisant son identifiant.",
+    tags=["Consultation des informations chevaux"]
+)
+def get_infos_cheval(idCheval: int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
     cheval = db.query(models.ChevauxTrotteurFrancais).filter(models.ChevauxTrotteurFrancais.id_tf == idCheval).first()
 
@@ -123,8 +151,14 @@ def get_infos_cheval(idCheval: int, db: Session = Depends(get_db)):
 
 
 # ------------------------------------------------------ Endpoint pour récupérer les stats d'un cheval -----------------------------------------------------|
-@app.get("/stat-cheval/{nomCheval}", response_model=schemas.ChevalResponse)
-def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db)):
+@app.get(
+    "/stat-cheval/{nomCheval}",
+    response_model=schemas.ChevalResponse,
+    summary="Obtenir les statistiques PMU d'un cheval quand elle sont dispos",
+    description="Récupère les statistiques détaillées d'un cheval spécifique, y compris le nombre de courses, la vitesse moyenne, les positions obtenues et les gains totaux.",
+    tags=["Consultation des informations chevaux"]
+)
+def get_stat_cheval_by_name(nomCheval: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     # Récupération du nom et vérification de l'existence du cheval dans les courses
     nom_cheval_normalise = nomCheval.upper()
     db_cheval = db.query(models.ParticipationsAuxCourses).filter(models.ParticipationsAuxCourses.nom == nom_cheval_normalise, models.ParticipationsAuxCourses.race == "TROTTEUR FRANCAIS").order_by(desc(models.ParticipationsAuxCourses.id_participation)).first()
@@ -215,6 +249,7 @@ def get_complete_info_enfant(nom: str, db: Session, depth: int):
     infos_mere = get_complete_info_parents(cheval.mere_tf, cheval.annee_naissance_tf, db, depth)
 
     return schemas.GenealogieResponse(
+        id=cheval.id_tf,
         nom=cheval.nom_tf,
         sexe=cheval.sexe_tf,
         couleur=cheval.couleur_tf,
@@ -244,6 +279,7 @@ def get_complete_info_parents(nom: str, child_birthdate: int, db: Session, depth
     infos_mere = get_complete_info_parents(cheval.mere_tf, cheval.annee_naissance_tf, db, depth - 1)
 
     return schemas.GenealogieResponse(
+        id=cheval.id_tf,
         nom=cheval.nom_tf,
         sexe=cheval.sexe_tf,
         couleur=cheval.couleur_tf,
@@ -256,8 +292,14 @@ def get_complete_info_parents(nom: str, child_birthdate: int, db: Session, depth
         informationsMere=infos_mere
     )
 
-@app.get("/genealogie-cheval/{nomCheval}", response_model=schemas.GenealogieResponse)
-def get_genealogie_cheval(nomCheval: str, idCheval: int, db: Session = Depends(get_db), depth: int = 1):
+@app.get(
+    "/genealogie-cheval/{nomCheval}/{idCheval}/{depth}",
+    response_model=schemas.GenealogieResponse,
+    summary="Obtenir la généalogie d'un cheval de la race trotteur français",
+    description="Récupère la généalogie complète d'un cheval spécifique, y compris les informations sur les parents et ancêtres jusqu'à une certaine profondeur.",
+    tags=["Consultation des informations chevaux"]
+)
+def get_genealogie_cheval(nomCheval: str, idCheval: int, depth: int = 1, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
     # Normalisation des noms
     nom_cheval_normalise = nomCheval.upper()
@@ -274,9 +316,6 @@ def get_genealogie_cheval(nomCheval: str, idCheval: int, db: Session = Depends(g
 
     return infos
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------|
-
-# chevaux à test OBJECTION JENILOU
-
 
 # Lancer le serveur avec Uvicorn
 if __name__ == "__main__":
