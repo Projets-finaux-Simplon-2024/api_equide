@@ -1,6 +1,6 @@
 # schemas.py
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional, List
 
 # ---- Endpoint stats-ifce
 class StatsIfceResponse(BaseModel):
@@ -8,8 +8,6 @@ class StatsIfceResponse(BaseModel):
     lienIfce: str
     dispoStats: str
     race: str
-
-
 
 
 # ---- Reponse de base
@@ -39,7 +37,6 @@ class InfosResponse(BaseModel):
         )
 
 
-
 # ---- Endpoint pagination
 class PaginationResponse(BaseModel):
     total_results: int
@@ -47,8 +44,6 @@ class PaginationResponse(BaseModel):
     current_page: int
     page_size: int
     results: List[InfosResponse]
-
-
 
 
 # ---- Endpoint stat-cheval
@@ -68,10 +63,9 @@ class ChevalResponse(BaseModel):
     montantTotalGagne: int
 
 
-
-
-
+# ---- Lié au endpoint de généalogie
 class GenealogieResponse(BaseModel):
+    id: int
     nom: str
     sexe: str
     couleur: str
@@ -86,3 +80,11 @@ class GenealogieResponse(BaseModel):
     class Config:
         from_attributes = True
         arbitrary_types_allowed = True
+
+
+# ---- Classe liée au token
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    algorithm: str

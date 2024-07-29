@@ -4,8 +4,6 @@ from sqlalchemy.orm import sessionmaker
 import os
 from sqlalchemy.exc import OperationalError
 
-# A mettre dans l'env du container
-# DATABASE_URL="postgresql://admin:admin@172.17.0.2:5432/bdd_equide"
 
 # URL de base de données par défaut
 DEFAULT_DATABASE_URL = "postgresql://admin:admin@localhost:5434/bdd_equide"
