@@ -32,10 +32,10 @@ docker run -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -
 > - **SECRET_KEY**: Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme
 > ### Variables d'environnement optionnelles
 > - **ALGORITHM**: Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. Par défaut **HS256**
-> - **ACCESS_TOKEN_EXPIRE_MINUTES** : Durée d'expiration du token en minutes. Par défaut **30 minutes**.
+> - **ACCESS_TOKEN_EXPIRE_MINUTES**: Durée d'expiration du token en minutes. Par défaut **30 minutes**.
 > ### Plus d'explications
 > - **8000:8000**: Mappage des ports entre intérieur et extérieur du container
-> - **[container_name]** : Nom du container après création
+> - **[container_name]**: Nom du container après création
 
 ## :heavy_plus_sign: Author
 ### Algorithme
