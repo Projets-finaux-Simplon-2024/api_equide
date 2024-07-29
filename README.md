@@ -26,15 +26,15 @@ docker run -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -
 
 > [!NOTE]
 > ### Variables d'environnement du container
-> - **DATABASE_URL** : Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
-> - **API_USERNAME** : Username pour se connecter à l'API
-> - **API_PASSWORD** : Password pour se connecter à l'API
-> - **SECRET_KEY** : Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme
+> - **DATABASE_URL**: Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
+> - **API_USERNAME**: Username pour se connecter à l'API
+> - **API_PASSWORD**: Password pour se connecter à l'API
+> - **SECRET_KEY**: Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme
 > ### Variables d'environnement optionnelles
-> - **ALGORITHM** : Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. Par défaut **HS256**
+> - **ALGORITHM**: Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. Par défaut **HS256**
 > - **ACCESS_TOKEN_EXPIRE_MINUTES** : Durée d'expiration du token en minutes. Par défaut **30 minutes**.
 > ### Plus d'explications
-> - **8000:8000** : Mappage des ports entre intérieur et extérieur du container
+> - **8000:8000**: Mappage des ports entre intérieur et extérieur du container
 > - **[container_name]** : Nom du container après création
 
 ## :heavy_plus_sign: Author
