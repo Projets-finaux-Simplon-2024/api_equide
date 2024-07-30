@@ -7,9 +7,9 @@ Cette application back-end est une API (Application Programming Interface) pour 
 Pour faire fonctionner l'API il faut commencer par créer la base de données qui correspond via le dépôt github [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
 
 > [!IMPORTANT]
-> Il est nécéssaire d'installer [:link:docker](https://docs.docker.com/desktop/) pour pouvoir récupérer container nécéssaire au fonctionnement de toute l'API.
+> Il est nécéssaire d'installer [:link:Docker](https://docs.docker.com/desktop/) pour pouvoir récupérer container nécéssaire au fonctionnement de toute l'API.
 
-### Pull de l'image de l'API
+### Récupération de l'image de l'API
 
 ```
 docker pull ghcr.io/projets-finaux-simplon-2024/api_equide:latest
