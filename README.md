@@ -1,7 +1,10 @@
 ﻿# API de la base de données équidé
+---
+---
 ## :heavy_plus_sign: Présentation
 Cette application back-end est une API (Application Programming Interface) pour permettre de consulter et de synthétiser des éléments de la base de données équidé construite avec le programme [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide). Les endpoints (points de terminaison) disponibles ont été crées de façon à pouvoir présenter les résultats dans un front-end et de maintenir indépendantes les responsabilités.
 
+---
 ## :heavy_plus_sign: Installlation
 ### Prérequis
 Pour faire fonctionner l'API il faut commencer par créer la base de données qui correspond via le dépôt github [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
@@ -40,6 +43,7 @@ docker run -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -
 > - **8000:8000**: Mappage des ports entre intérieur et extérieur du container
 > - **[container_name]**: Nom du container après création
 
+---
 ## :heavy_plus_sign: Author
 ### Algorithme
 L'API utilise par défaut l'algorithme **HS256**. L'agorithme utilisé conditonne la clé de signature des tokens. Tel que : 
@@ -61,6 +65,7 @@ print(SECRET_KEY)
 > Avec le générateur il est possible de faire varier le bouton pour régler le nombre d'octets nécéssaire.
 > ![Capture d'écran 2024-07-29 180342](https://github.com/user-attachments/assets/fb485c46-7931-406f-8a75-b1d3ad151acf)
 
+---
 ## :heavy_plus_sign: Endpoints
 ### Base de données
 Schéma de la base de données utilisé pour l'API
@@ -83,6 +88,7 @@ http://127.0.0.1:8000/docs
 - ```/stat-cheval/{nomCheval}``` : Récupération des statistiques PMU d'un cheval pour compléter la fiche d'un cheval.
 - ```/genealogie-cheval/{nomCheval}/{idCheval}/{depth}``` : Récupération de la généalogie d'un cheval via la table trotteur français pour compléter la fiche d'un cheval.
 
+---
 ## :heavy_plus_sign: Annexes
 ### Librairies
 :computer:**Système**
