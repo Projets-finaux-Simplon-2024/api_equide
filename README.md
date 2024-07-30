@@ -1,4 +1,7 @@
 ﻿# API de la base de données équidé
+## :heavy_plus_sign: Présentation
+Cette application back-end est une API (Application Programming Interface) pour permettre de consulter et de synthétiser des éléments de la base de données équidé construite avec le programme [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide). Les endpoints (points de terminaison) disponibles ont été crées de façon à pouvoir présenter les résultats dans un front-end et de maintenir indépendantes les responsabilités.
+
 ## :heavy_plus_sign: Installlation
 ### Prérequis
 Pour faire fonctionner l'API il faut commencer par créer la base de données qui correspond via le dépôt github [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
@@ -86,7 +89,7 @@ http://127.0.0.1:8000/docs
 
 - **FastAPI** : Framework web moderne et rapide pour construire des APIs avec Python 3.6+ basé sur les standards OpenAPI et JSON Schema.
 - **Uvicorn** : Serveur ASGI léger et performant, utilisé pour déployer des applications FastAPI.
-- **SQLAlchemy** : Toolkit SQL et ORM pour Python, permettant de travailler avec des bases de données de manière déclarative.
+- **SQLAlchemy** : Toolkit SQL et ORM (Object-Relational Mapping) pour Python, permettant de travailler avec des bases de données de manière déclarative.
 
  :floppy_disk:**Traitement**
 
