@@ -1,4 +1,7 @@
 ﻿# API de la base de données équidé
+## :heavy_plus_sign: Présentation
+Cette application back-end est une API (Application Programming Interface) pour permettre de consulter et de synthétiser des éléments de la base de données équidé construite avec le programme [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide). Les endpoints (points de terminaison) disponibles ont été crées de façon à pouvoir présenter les résultats dans un front-end et de maintenir indépendantes les responsabilités.
+
 ## :heavy_plus_sign: Installlation
 ### Prérequis
 Pour faire fonctionner l'API il faut commencer par créer la base de données qui correspond via le dépôt github [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
@@ -26,13 +29,13 @@ docker run -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -
 
 > [!NOTE]
 > ### Variables d'environnement du container
-> - **DATABASE_URL**: Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
-> - **API_USERNAME**: Username pour se connecter à l'API
-> - **API_PASSWORD**: Password pour se connecter à l'API
-> - **SECRET_KEY**: Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme
+> - **DATABASE_URL**: Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide) :key:(REQUIRED)
+> - **API_USERNAME**: Username pour se connecter à l'API :key:(REQUIRED)
+> - **API_PASSWORD**: Password pour se connecter à l'API :key:(REQUIRED)
+> - **SECRET_KEY**: Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme :key:(REQUIRED)
 > ### Variables d'environnement optionnelles
-> - **ALGORITHM**: Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. Par défaut **HS256**
-> - **ACCESS_TOKEN_EXPIRE_MINUTES**: Durée d'expiration du token en minutes. Par défaut **30 minutes**.
+> - **ALGORITHM**: Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. :key:(Par défaut **HS256**);
+> - **ACCESS_TOKEN_EXPIRE_MINUTES**: Durée d'expiration du token en minutes. :key:(Par défaut **30 minutes**).
 > ### Plus d'explications
 > - **8000:8000**: Mappage des ports entre intérieur et extérieur du container
 > - **[container_name]**: Nom du container après création
@@ -86,7 +89,7 @@ http://127.0.0.1:8000/docs
 
 - **FastAPI** : Framework web moderne et rapide pour construire des APIs avec Python 3.6+ basé sur les standards OpenAPI et JSON Schema.
 - **Uvicorn** : Serveur ASGI léger et performant, utilisé pour déployer des applications FastAPI.
-- **SQLAlchemy** : Toolkit SQL et ORM pour Python, permettant de travailler avec des bases de données de manière déclarative.
+- **SQLAlchemy** : Toolkit SQL et ORM (Object-Relational Mapping) pour Python, permettant de travailler avec des bases de données de manière déclarative.
 
  :floppy_disk:**Traitement**
 
