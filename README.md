@@ -22,26 +22,25 @@ docker pull ghcr.io/projets-finaux-simplon-2024/api_equide:latest
 Voici la ligne générique de création du container 
 
 ```
-docker run -e DATABASE_URL=[chaine_de_connexion] -e API_USERNAME=[yourusername] -e API_PASSWORD=[yourpassword] -e SECRET_KEY=[your_generated_secret_key] -p 8000:8000 [container_name]
+docker run --name [nom_container_destinataire] -e DATABASE_URL=[chaine_de_connexion] -e API_USERNAME=[yourusername] -e API_PASSWORD=[yourpassword] -e SECRET_KEY=[your_generated_secret_key] -p [port_hote]:[port_container] [nom_image_expeditrice]
 ```
 
 Exemple par défaut 
 ```
-docker run -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -e API_USERNAME=admin -e API_PASSWORD=admin -e SECRET_KEY=75bdaa1397df51c94112f76b70cd62221b3bd97fd9ae35d07edc5fcd02dff068 -p 8000:8000 api_equide
+docker run --name container_api_equide -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -e API_USERNAME=admin -e API_PASSWORD=admin -e SECRET_KEY=75bdaa1397df51c94112f76b70cd62221b3bd97fd9ae35d07edc5fcd02dff068 -p 8000:8000 image_api_equide
 ```
 
 > [!NOTE]
 > ### Variables d'environnement du container
-> - **DATABASE_URL**: Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide) :key:(REQUIRED)
-> - **API_USERNAME**: Username pour se connecter à l'API :key:(REQUIRED)
-> - **API_PASSWORD**: Password pour se connecter à l'API :key:(REQUIRED)
-> - **SECRET_KEY**: Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme :key:(REQUIRED)
+> - :key:**DATABASE_URL**: (REQUIRED) Chaîne de connexion à la base de données, déterminer au moment de la création de la bdd avec le programme de remplissage [:link:build_bdd_equide](https://github.com/Projets-finaux-Simplon-2024/build_bdd_equide)
+> 
+> :warning:ATTENTION l'ordre de lancement des containers peut modifier l'ip accessible:warning:
+> - :key:**API_USERNAME**: (REQUIRED) Username pour se connecter à l'API 
+> - :key:**API_PASSWORD**: (REQUIRED) Password pour se connecter à l'API
+> - :key:**SECRET_KEY**: (REQUIRED) Signature des tokens pour l'utilisation de l'API. Pour plus d'informations voir la section Algorithme
 > ### Variables d'environnement optionnelles
-> - **ALGORITHM**: Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*. :key:(Par défaut **HS256**);
-> - **ACCESS_TOKEN_EXPIRE_MINUTES**: Durée d'expiration du token en minutes. :key:(Par défaut **30 minutes**).
-> ### Plus d'explications
-> - **8000:8000**: Mappage des ports entre intérieur et extérieur du container
-> - **[container_name]**: Nom du container après création
+> - :zap:**ALGORITHM**: (Par défaut **HS256**) Algorithme utilisé dans l'API *HS256*, *HS384*, *HS512*.
+> - :zap:**ACCESS_TOKEN_EXPIRE_MINUTES**: (Par défaut **30 minutes**) Durée d'expiration du token en minutes.
 
 ---
 ## :heavy_plus_sign: Author
