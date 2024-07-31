@@ -27,7 +27,7 @@ docker run --name [nom_container_destinataire] -e DATABASE_URL=[chaine_de_connex
 
 Exemple par défaut 
 ```
-docker run --name container_api_equide -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -e API_USERNAME=admin -e API_PASSWORD=admin -e SECRET_KEY=75bdaa1397df51c94112f76b70cd62221b3bd97fd9ae35d07edc5fcd02dff068 -p 8000:8000 image_api_equide
+docker run --name container_api_equide -e DATABASE_URL=postgresql://admin:admin@172.17.0.2:5432/bdd_equide -e API_USERNAME=admin -e API_PASSWORD=admin -e SECRET_KEY=75bdaa1397df51c94112f76b70cd62221b3bd97fd9ae35d07edc5fcd02dff068 -p 8000:8000 ghcr.io/projets-finaux-simplon-2024/image_api_equide:latest
 ```
 
 > [!NOTE]
