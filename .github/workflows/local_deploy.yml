@@ -69,4 +69,4 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push push ghcr.io/projets-finaux-simplon-2024/image_api_equide:latest
+          docker push ghcr.io/projets-finaux-simplon-2024/image_api_equide:latest
