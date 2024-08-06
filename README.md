@@ -75,7 +75,11 @@ Schéma de la base de données utilisé pour l'API
 ### Accés à la documentation SWAGGER
 Il est possible d'accéder à la documentation de l'API générer par SWAGGER
 ```
-http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/
+```
+ou au format ReDoc avec
+```
+http://localhost:8000/docs
 ```
 ### Résumer des endpoints
 :door:**Méthode(s) POST** 
@@ -87,6 +91,8 @@ http://127.0.0.1:8000/docs
 - ```/infos-cheval/{idCheval}``` : Recupération des informations d'un cheval de la table trotteur français pour compléter la fiche d'un cheval.
 - ```/stat-cheval/{nomCheval}``` : Récupération des statistiques PMU d'un cheval pour compléter la fiche d'un cheval.
 - ```/genealogie-cheval/{nomCheval}/{idCheval}/{depth}``` : Récupération de la généalogie d'un cheval via la table trotteur français pour compléter la fiche d'un cheval.
+- ```/conditions-utilisation``` : Récupération des conditions d'utilisation.
+- ```/politique-de-confidentialite``` : Récupération de la politique de confidentialité.
 
 ---
 ## :heavy_plus_sign: Annexes

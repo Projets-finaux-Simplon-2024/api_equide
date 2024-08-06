@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from . import models, schemas, database
@@ -8,6 +10,8 @@ import pandas as pd
 
 # Créer l'application FastAPI avec des métadonnées personnalisées
 app = FastAPI(
+    docs_url="/",
+    redoc_url="/docs",
     title="API de Gestion des Chevaux",
     description="Cette API permet de gérer les informations et les statistiques des chevaux trotteur français.",
     version="1.0.0",
@@ -16,6 +20,9 @@ app = FastAPI(
 
 # Monter le routeur d'authentification
 app.include_router(auth_router, prefix="/auth", tags=["Author"])
+
+# Configurer le répertoire des templates
+templates = Jinja2Templates(directory="templates")
 
 # Dépendance pour obtenir une session de base de données
 def get_db():
@@ -316,6 +323,31 @@ def get_genealogie_cheval(nomCheval: str, idCheval: int, depth: int = 1, db: Ses
 
     return infos
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+
+
+# ------------------------------------------------------ Conditions d'utilisation --------------------------------------------------------------------------|
+@app.get(
+    "/conditions-utilisation",
+    response_class=HTMLResponse,
+    summary="URL des conditions d'utilisation",
+    description="Permet de voir les conditions d'utilisation de l'API",
+    tags=["Conditions d'utilisation et politique de confidentialité"]
+)
+async def terms_of_service(request: Request):
+    return templates.TemplateResponse("conditions_utilisation.html", {"request": request})
+
+@app.get(
+    "/politique-de-confidentialite",
+    response_class=HTMLResponse,
+    summary="URL de la politique de confidentialité",
+    description="Permet de voir la politique de confidentialité de l'API",
+    tags=["Conditions d'utilisation et politique de confidentialité"]
+)
+async def privacy_policy(request: Request):
+    return templates.TemplateResponse("politique_de_confidentialite.html", {"request": request})
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------|
+
 
 # Lancer le serveur avec Uvicorn
 if __name__ == "__main__":
