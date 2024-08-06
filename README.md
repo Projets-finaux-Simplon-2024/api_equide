@@ -16,7 +16,7 @@ Pour faire fonctionner l'API il faut commencer par créer la base de données qu
 ### Récupération de l'image de l'API
 
 ```
-docker pull ghcr.io/projets-finaux-simplon-2024/api_equide:latest
+docker pull ghcr.io/projets-finaux-simplon-2024/image_api_equide:latest
 ```
 
 ### Création du container
